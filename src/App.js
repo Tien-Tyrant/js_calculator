@@ -24,7 +24,7 @@ class App extends React.Component {
     { id: 'four', value: '4', display: '4' },
     { id: 'five', value: '5', display: '5' },
     { id: 'six', value: '6', display: '6' },
-    { id: 'add', value: '+', display: '+' , styleClass: 'operator'},
+    { id: 'add', value: '+', display: '+', styleClass: 'operator' },
     { id: 'one', value: '1', display: '1' },
     { id: 'two', value: '2', display: '2' },
     { id: 'three', value: '3', display: '3' },
@@ -44,10 +44,13 @@ class App extends React.Component {
 
     if (value === '=') {
       if (this.state.formula !== '' && this.state.formula.indexOf('=') < 0) {
-        this.setState(state => ({
-          formula: state.formula + '=' + eval(state.formula)
-        }))
-
+        this.setState(state => {
+          const formulaResult = eval(state.formula);
+          return {
+            formula: state.formula + '=' + formulaResult,
+            result: formulaResult
+          }
+        })
       }
       return;
     }
