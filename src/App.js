@@ -8,6 +8,7 @@ class App extends React.Component {
     this.state = {
       formula: '',
       result: '0',
+      isLastOperator: false
     }
 
     this.addToFormula = this.addToFormula.bind(this);
@@ -40,7 +41,8 @@ class App extends React.Component {
     if (id === "clear") {
       this.setState({
         formula: '',
-        result: '0'
+        result: '0',
+        isLastOperator: button.isOperator
       })
       return;
     }
@@ -48,10 +50,11 @@ class App extends React.Component {
     if (id === 'equals') {
       if (this.state.formula !== '' && !this.hasEqualOperator()) {
         this.setState(state => {
-          const formulaResult = eval(state.formula);
+          const formulaResult = eval(state.formula.replace(/--/g, '-'));
           return {
-            formula: `${state.formula}=${formulaResult}`,
-            result: `${formulaResult}`
+            formula: `${state.formula.replace(/--/g, '-')}=${formulaResult}`,
+            result: `${formulaResult}`,
+            isLastOperator: button.isOperator
           }
         })
       }
@@ -62,28 +65,47 @@ class App extends React.Component {
       if (button.isOperator) {
         this.setState(state => ({
           formula: `${state.result}${button.value}`,
-          result: button.display
+          result: button.display,
+          isLastOperator: button.isOperator
         }));
       }
       else {
-        if (id === 'decimal') {
-          this.setState({
-            formula: `0.`,
-            result: button.display
-          })
-        } else {
-          this.setState({
-            formula: `${button.value}`,
-            result: button.display
-          });
-        }
+        this.setState({
+          formula: id === 'decimal' ? `0.` : `${button.value}`,
+          result: button.display,
+          isLastOperator: button.isOperator
+        })
       }
+      return;
+    }
+
+    if (this.state.isLastOperator && button.isOperator) {
+      if (button.id === 'subtract') {
+        this.setState(state => {
+          const newFormula = `${state.formula}${button.value}`;
+
+          return {
+            formula: newFormula.endsWith('---') ? newFormula.slice(0, -1) : newFormula,
+            result: button.display,
+            isLastOperator: button.isOperator
+          }
+        })
+      }
+      else {
+        this.setState(state => ({
+          formula: `${state.formula.slice(0, -1)}${button.value}`,
+          result: button.display,
+          isLastOperator: button.isOperator
+        }))
+      }
+
       return;
     }
 
     this.setState(state => ({
       formula: `${state.formula}${button.value}`,
-      result: button.display
+      result: button.display,
+      isLastOperator: button.isOperator
     }))
   }
 
